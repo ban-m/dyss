@@ -7,6 +7,14 @@ If you are interested in the log files of our experiments, please see [this repo
 
 To benchmark my implementation by pre-recorded data,please see [this repo](https://github.com/ban-m/long_reference_speedcheck) for speed checking and [this one](https://github.com/ban-m/score_calculate) for precision/sensitivity. I recommend using these repositories rather than using read until API with a bulk-fast5 file.
 
+
+### Updates 2020/09/08
+
+MinION's interface, MinKNOW, has been updated, and basecallers has been improving since the publish of this repository.
+Thus, we higly recommend to use alternative approach to use basecallers and other aligner to fully utilize ReadUntil's functionality.
+
+
+
 ## What this software can/can not? (DISCLAIMER)
 
 - Dyss can select reads by using their first 250-500 "squiggles" rather than sequence comparison after base calling. These squiggles are computed from the raw nanopore signal by segmentation.
@@ -21,10 +29,6 @@ To benchmark my implementation by pre-recorded data,please see [this repo](https
 
 ## How I can use Dyss?
 
-### Updates 2020/09/08
-
-MinION's interface, MinKNOW, has been updated, and basecallers has been improving since the publish of this repository.
-Thus, we recommend to use alternative approach to use basecallers and other aligner to fully utilize ReadUntil's functionality.
 
 
 ### Requirements
