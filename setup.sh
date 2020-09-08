@@ -6,9 +6,7 @@ set -ue
 cd ../
 python3 -m pip install h5py
 git clone https://github.com/nanoporetech/ont_fast5_api.git
-cd ont_fast5_api
-make develop
-cd ../
+pip install ./ont_fast5_api
 
 ## Cloning dependent libraries
 for repository in dtw utility knn_predictor histogram_minimizer squiggler fast5wrapper
