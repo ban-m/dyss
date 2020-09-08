@@ -13,9 +13,9 @@ cd ../
 ## Cloning dependent libraries
 for repository in dtw utility knn_predictor histogram_minimizer squiggler fast5wrapper
 do
-    hg clone https://ban-m@bitbucket.org/ban-m/${repository}
+    git clone git@github.com:ban-m/${repository}.git
 done
 cd dyss
 git clone https://github.com/nanoporetech/kmer_models.git
-#python3 -m pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
 cargo build --release
