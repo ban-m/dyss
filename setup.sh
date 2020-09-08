@@ -17,5 +17,5 @@ do
 done
 cd dyss
 git clone https://github.com/nanoporetech/kmer_models.git
-python3 -m pip install -r requirements.txt
+python3 -m pip install -r requirements_local.txt
 cargo build --release
