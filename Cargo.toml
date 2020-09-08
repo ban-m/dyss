@@ -1,0 +1,18 @@
+[package]
+name = "dyss"
+version = "0.1.0"
+authors = ["ban-m <ban-m@g.ecc.u-tokyo.ac.jp>"]
+
+[dependencies]
+dtw = {path = "../dtw"}
+squiggler = {path = "../squiggler"}
+fast5wrapper = {path = "./../fast5wrapper"}
+rand = "*"
+libc = "0.2"
+bio = "*"
+rayon = "*"
+utility = {path = "./../utility"}
+
+[lib]
+name = "dyss"
+crate_type =["dylib"]
