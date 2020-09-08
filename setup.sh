@@ -1,6 +1,6 @@
 #!/bin/bash
 ## Author: Bansho Masutani<banmasutani@gmail.com>
-
+set -ue
 
 ## Install h5py and ont_fast5_api
 cd ../

@@ -44,7 +44,10 @@ as follows:
 
 After that, clone this repository and build it.
 ```bash
+mkdir dyss
+cd dyss
 git clone https://github.com/ban-m/dyss
+cd dyss
 bash setup.sh
 ```
 
