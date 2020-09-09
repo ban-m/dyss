@@ -6,12 +6,13 @@
 If you are interested in the log files of our experiments, please see [this repo](https://github.com/ban-m/readuntillogfiles). These include IDs of reads marked as "rejected"/"accepted."
 
 To benchmark my implementation by pre-recorded data,please see [this repo](https://github.com/ban-m/long_reference_speedcheck) for speed checking and [this one](https://github.com/ban-m/score_calculate) for precision/sensitivity. I recommend using these repositories rather than using read until API with a bulk-fast5 file.
+(Due to migration from BitBucket to GitHub, these repositories are currently unavailable. 2020/09/09)
 
 
-### Updates 2020/09/08
+## Updates 2020/09/08
 
 MinION's interface, MinKNOW, has been updated, and basecallers has been improving since the publish of this repository.
-Thus, we higly recommend to use alternative approach to use basecallers and other aligner to fully utilize ReadUntil's functionality.
+Thus, Dyss packages are no longer compatible with MinKNOW version 2.0 and we higly recommend to use alternative approach to use basecallers and other aligner to fully utilize ReadUntil's functionality.
 
 
 
