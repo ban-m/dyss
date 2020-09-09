@@ -1,15 +1,15 @@
-use libc;
-use std;
 use dtw;
+use libc;
 use rayon::prelude::*;
-use std::path::Path;
+use squiggler;
+use std;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
-use squiggler;
+use std::path::Path;
 use utility::utilities;
-const WINDOWS:[usize;2] = [4, 8];
-const THRESHOLDS:[f64;2] =[1.5, 9.0];
-const DELTA:f64 = 0.2;
+const WINDOWS: [usize; 2] = [4, 8];
+const THRESHOLDS: [f64; 2] = [1.5, 9.0];
+const DELTA: f64 = 0.2;
 #[derive(Debug)]
 #[repr(C)]
 pub struct Dyss {
@@ -42,32 +42,38 @@ impl Dyss {
             Some(res) => res,
             None => return None,
         };
-        eprintln!("{},{},{},{},{}", refsize, power, num_packs, num_scouts,threshold);
+        eprintln!(
+            "{},{},{},{},{}",
+            refsize, power, num_packs, num_scouts, threshold
+        );
         let model = match squiggler::Squiggler::new(&Path::new(model_path)) {
             Ok(res) => res,
             Err(_why) => {
-                eprintln!(r#"
+                eprintln!(
+                    r#"
 Something went wrong during the conversion from fasta file into raw-signal-like pattern.
 First of all, please check the required files(model file and fasta file) exists.
 Next, please make sure that both ont_fast5_api and h5py library have been installed correctly into your PYTHON3.
 It might be because the model file is not written in a valid format. Please use ont_kmer_model as is.
 Or feel free to contact us: banmasutani@gmail.com
-"#);
+"#
+                );
                 return None;
             }
         };
         let power = power as f32 / 100.;
-        let (temp,rev) = match utilities::setup_template_complement_autofit(&Path::new(ref_path),refsize){
-            Ok((temp,rev)) => (temp,rev),
-            Err(why) => {
-                eprintln!("{:?}",why);
-                return None;
-            }
-        };
-        let temp = utilities::convert_to_squiggle(&temp,&model);
-        let rev = utilities::convert_to_squiggle(&rev,&model);
-        let reference:Vec<_> = temp.into_iter().chain(rev.into_iter()).collect();
-        eprintln!("reflen:{:?}",reference.len());
+        let (temp, rev) =
+            match utilities::setup_template_complement_autofit(&Path::new(ref_path), refsize) {
+                Ok((temp, rev)) => (temp, rev),
+                Err(why) => {
+                    eprintln!("{:?}", why);
+                    return None;
+                }
+            };
+        let temp = utilities::convert_to_squiggle(&temp, &model);
+        let rev = utilities::convert_to_squiggle(&rev, &model);
+        let reference: Vec<_> = temp.into_iter().chain(rev.into_iter()).collect();
+        eprintln!("reflen:{:?}", reference.len());
         Some(Dyss {
             threshold,
             num_scouts,
@@ -86,12 +92,12 @@ Or feel free to contact us: banmasutani@gmail.com
         num_scouts: usize,
     ) -> Option<(f32, f32)> {
         match File::open(param_path).and_then(|e| {
-            BufReader::new(e).lines()
-                .filter_map(|e|e.ok())
-                .skip(1)//header
+            BufReader::new(e)
+                .lines()
+                .filter_map(|e| e.ok())
+                .skip(1) //header
                 .filter_map(|e| Self::parse_line(e))
-                .filter(|e| e.0 == refsize && e.1 == power &&
-                        e.2 == num_packs && e.3 == num_scouts)
+                .filter(|e| e.0 == refsize && e.1 == power && e.2 == num_packs && e.3 == num_scouts)
                 .nth(0)
                 .ok_or(std::io::Error::from(std::io::ErrorKind::Other))
         }) {
@@ -158,20 +164,19 @@ Or feel free to contact us: banmasutani@gmail.com
     }
     #[inline]
     fn classify(&self, query: &[i32]) -> i32 {
-        use squiggler;
         let before = query.len();
-        let query = utilities::trim_front_vec(&query,70,15);
-        let query = utilities::event_detect_mult_ttest(&query,&WINDOWS,&THRESHOLDS,DELTA);
+        let query = utilities::trim_front_vec(&query, 70, 15);
+        let query = utilities::event_detect_mult_ttest(&query, &WINDOWS, &THRESHOLDS, DELTA);
         if query.len() < self.querysize {
-            return 2;// not enough length
+            return 2; // not enough length
         }
 
-        let query:Vec<_> = query.into_iter().map(|e|e.mean as f32).collect();
+        let query: Vec<_> = query.into_iter().map(|e| e.mean as f32).collect();
         let query = dtw::normalize(&query, dtw::NormalizeType::Z);
         let query = squiggler::dedup(&query, self.power);
         if query.len() < self.querysize {
-            eprintln!("query chunked {},{}",before,query.len());
-            return 2;// not enough length
+            eprintln!("query chunked {},{}", before, query.len());
+            return 2; // not enough length
         }
         // let preprocess = time::Instant::now();
         if let Ok((score, _, _)) = dtw::scouting_threshold_dtw(
@@ -180,14 +185,14 @@ Or feel free to contact us: banmasutani@gmail.com
             &hill,
             Some(self.num_scouts),
             Some(self.num_packs),
-            self.threshold
-        ){
+            self.threshold,
+        ) {
             // let process = time::Instant::now();
             // eprintln!("OK {:?},{:?}",preprocess-start ,process - preprocess);
             eprintln!("score,{}", score);
             if score < self.threshold {
                 1
-            }else{
+            } else {
                 0
             }
         } else {
@@ -220,11 +225,13 @@ pub extern "C" fn construct_dyss(
         match CStr::from_ptr(ref_path).to_str() {
             Ok(res) => res,
             Err(_why) => {
-                eprintln!(r#"
+                eprintln!(
+                    r#"
 An invalid reference file was sapplied.
 DySS halted its execution. Please check your command line arguments(For example, confirm the file exists).
 Or contact us: banmasutani@gmail.com
-"#);
+"#
+                );
                 return std::ptr::null_mut();
             }
         }
@@ -233,11 +240,13 @@ Or contact us: banmasutani@gmail.com
         match CStr::from_ptr(model_path).to_str() {
             Ok(res) => res,
             Err(_why) => {
-                eprintln!(r#"
+                eprintln!(
+                    r#"
 An invalid model file was sapplied.
 DySS halted its execution. Please check your command line arguments(For example, confirm the file exists).
 Or contact us: banmasutani@gmail.com
-"#);
+"#
+                );
                 return std::ptr::null_mut();
             }
         }
@@ -246,11 +255,13 @@ Or contact us: banmasutani@gmail.com
         match CStr::from_ptr(param_path).to_str() {
             Ok(res) => res,
             Err(_why) => {
-                eprintln!(r#"
+                eprintln!(
+                    r#"
 An invalid model file was sapplied.
 DySS halted its execution. Please check your command line arguments(For example, confirm the file exists).
 Or contact us: banmasutani@gmail.com
-"#);
+"#
+                );
                 return std::ptr::null_mut();
             }
         }
@@ -267,11 +278,13 @@ Or contact us: banmasutani@gmail.com
     ) {
         Some(res) => res,
         None => {
-            eprintln!(r#"
+            eprintln!(
+                r#"
 DySS could not be constructed properly. Execution halt.
 Please check whether the files exist.
 If the problem persists, plese contact me: banmasutani@gmail.com
-"#);
+"#
+            );
             return std::ptr::null_mut();
         }
     };
@@ -290,17 +303,17 @@ pub extern "C" fn dyss_classify(
         //eprintln!("query is null");
         return 0;
     } else {
-        unsafe{std::slice::from_raw_parts(query, length as usize) }
+        unsafe { std::slice::from_raw_parts(query, length as usize) }
     };
     //    eprint!("querysetup:{}",start.elapsed().subsec_nanos()/(10u32.pow(3)));
     let classifier = if ptr.is_null() {
         //eprintln!("classifier is null. Maybe you free this struct previously");
         return 0;
     } else {
-        unsafe { & *ptr }
+        unsafe { &*ptr }
     };
     //    let c_start = Instant::now();
-    classifier.classify(& query)
+    classifier.classify(&query)
 }
 
 #[no_mangle]
@@ -330,43 +343,49 @@ fn parameter_parse() {
         20,
         1,
         10,
-    ).unwrap();
+    )
+    .unwrap();
     assert!(threshold > 21.6);
 }
 
 #[no_mangle]
-pub extern "C" fn batch_classify(dyss:*const Dyss,data:*const *const libc::c_int,lengths:*const libc::size_t,
-                                 num_of_data:libc::size_t,result:*mut libc::c_int)->libc::c_int{
-    let dyss = if dyss.is_null(){
-        return 0
-    }else{
-        unsafe{& *dyss}
+pub extern "C" fn batch_classify(
+    dyss: *const Dyss,
+    data: *const *const libc::c_int,
+    lengths: *const libc::size_t,
+    num_of_data: libc::size_t,
+    result: *mut libc::c_int,
+) -> libc::c_int {
+    let dyss = if dyss.is_null() {
+        return 0;
+    } else {
+        unsafe { &*dyss }
     };
-    let lengths = if lengths.is_null(){
-        return 2
-    }else{
-        unsafe{std::slice::from_raw_parts(lengths,num_of_data)}
+    let lengths = if lengths.is_null() {
+        return 2;
+    } else {
+        unsafe { std::slice::from_raw_parts(lengths, num_of_data) }
     };
-    let data = if data.is_null(){
-        return 3
-    }else{
-        unsafe{std::slice::from_raw_parts(data,num_of_data)}
+    let data = if data.is_null() {
+        return 3;
+    } else {
+        unsafe { std::slice::from_raw_parts(data, num_of_data) }
     };
     let mut chunks = Vec::with_capacity(num_of_data);
-    for index in 0..num_of_data{
-        if data[index].is_null(){
-            return 4
-        }else{
-            chunks.push(unsafe{std::slice::from_raw_parts(data[index],lengths[index])});
+    for index in 0..num_of_data {
+        if data[index].is_null() {
+            return 4;
+        } else {
+            chunks.push(unsafe { std::slice::from_raw_parts(data[index], lengths[index]) });
         }
     }
-    let result = if result.is_null(){
-        return 5
-    }else{
-        unsafe{std::slice::from_raw_parts_mut(result,num_of_data)}
+    let result = if result.is_null() {
+        return 5;
+    } else {
+        unsafe { std::slice::from_raw_parts_mut(result, num_of_data) }
     };
-    let classified:Vec<_> = chunks.par_iter().map(|&e|dyss.classify(e)).collect();
-    for index in 0..num_of_data{
+    let classified: Vec<_> = chunks.par_iter().map(|&e| dyss.classify(e)).collect();
+    for index in 0..num_of_data {
         result[index] = classified[index];
     }
     1

@@ -9,7 +9,7 @@ git clone https://github.com/nanoporetech/ont_fast5_api.git
 pip install ./ont_fast5_api
 
 ## Cloning dependent libraries
-for repository in dtw utility knn_predictor histogram_minimizer squiggler fast5wrapper
+for repository in dtw utility knn_predictor histogram_minimizer squiggler
 do
     git clone git@github.com:ban-m/${repository}.git
 done
